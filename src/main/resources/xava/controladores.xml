@@ -2,34 +2,15 @@
 
 <!DOCTYPE controladores SYSTEM "dtds/controladores.dtd">
 
-<!-- 
-Documentación sobre controladores: 
-https://www.openxava.org/OpenXavaDoc/docs/controllers_es.html
-
-Controladores por defecto, incluidos en OpenXava (puedes extender de ellos):
-https://github.com/openxava/openxava/blob/master/openxava/src/main/resources/xava/default-controllers.xml
- 
-Ejemplos de controladores (de la aplicación de pruebas):
-https://github.com/openxava/openxava/blob/master/openxavatest/src/main/resources/xava/controllers.xml
--->
-
 <controladores>
-    
-    <!-- Variable de entorno: 
-    <var-entorno nombre="ProyectoPoo_ANYO_DEFECTO" valor="2015"/>
-    -->
-    
-    <!-- Objeto de sesión:
-    <Objeto nombre="ProyectoPoo_anyoActivo" clase="java.lang.Integer" valor="2015" 
-            ambito="global"/>
-    -->
-    
-    <!-- Controlador:
-    <controlador nombre="Profesor">
+
+    <controlador nombre="TestVocabulario">
         <hereda-de controlador="Typical"/>
-        <accion nombre="new" icono="plus-box-multiple" atajo-de-teclado="Control N" 
-                clase="acciones.CrearProfesor"/>        
+        <accion nombre="new"
+                clase="ni.edu.uam.ProyectoPoo.acciones.NuevoTestVocabularioAction"
+                imagen="new.gif"
+                icono="add"
+                atajo-de-teclado="Control N"/>
     </controlador>
-    -->
-    
+
 </controladores>

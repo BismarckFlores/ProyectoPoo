@@ -7,28 +7,21 @@ import org.openxava.annotations.*;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
-@Tab(properties =
-        "nombre," +
-                "primerApellido," +
-                "segundoApellido," +
-                "fechaNacimiento," +
-                "sexo," +
-                "estudiosRealizados," +
-                "profesion"
-)
 @View(members =
-        "Datos Personales[" +
+        "Datos Personales{" +
                 "nombre;" +
                 "primerApellido, segundoApellido;" +
                 "fechaNacimiento, edad;" +
                 "sexo;" +
                 "estudiosRealizados;" +
                 "profesion" +
-                "]"
+        "}" +
+        "Tests Tomados { testsVocabulario }"
 )
 public class Sujeto extends Identificable {
 
@@ -56,7 +49,7 @@ public class Sujeto extends Identificable {
     @Column(length = 150)
     private String profesion;
 
-    @ReadOnly
+    @ReadOnly @Hidden
     @Depends("fechaNacimiento")
     public Integer getEdad() {
         if (fechaNacimiento == null) return null;
@@ -67,7 +60,7 @@ public class Sujeto extends Identificable {
         ).getYears();
     }
 
-    @ReadOnly
+    @ReadOnly @Hidden
     public String getNombreCompleto() {
         return String.format("%s %s %s",
                         nombre != null ? nombre : "",
@@ -76,4 +69,9 @@ public class Sujeto extends Identificable {
                 .replaceAll("\\s+", " ")
                 .trim();
     }
+
+    @OneToMany(mappedBy = "sujeto")
+    @ReadOnly
+    @CollectionView("preview")
+    private List<TestVocabulario> testsVocabulario;
 }

@@ -11,16 +11,22 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @View(members =
-        "Datos Generales[" +
+        "Datos Generales{" +
                 "sujeto;" +
                 "fechaExamen;" +
                 "finalidad;" +
-                "evaluador" +
-                "];" +
-                "Respuestas[" +
-                "respuestas" +
-                "];"
-
+                "evaluador;" +
+        "}" +
+        "Respuestas{" +
+                "respuestasVoc1," +
+                "respuestasVoc2;" +
+        "}"
+)
+@View(name = "preview",
+        members =
+                "fechaExamen;" +
+                "finalidad;" +
+                "evaluador;"
 )
 public class TestVocabulario extends Identificable {
 
@@ -41,16 +47,10 @@ public class TestVocabulario extends Identificable {
     private String evaluador;
 
     @ElementCollection
-    @ListProperties("numeroItem, respuestamarcada")
-    private java.util.List<RespuestaItem> respuestas = new java.util.ArrayList<>();
+    @ListProperties("numeroItem, alternativa")
+    private java.util.List<RespuestaItem> respuestasVoc1 = new java.util.ArrayList<>();
 
-    public TestVocabulario() {
-        for (int i = 0; i < 77; i++) {
-
-            RespuestaItem item = new RespuestaItem();
-            item.setNumeroItem(i+1);
-
-            respuestas.add(item);
-        }
-    }
+    @ElementCollection
+    @ListProperties("numeroItem, alternativa")
+    private java.util.List<RespuestaItem> respuestasVoc2 = new java.util.ArrayList<>();
 }
