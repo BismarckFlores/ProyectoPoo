@@ -4,4 +4,5 @@ public enum EstadoResultado {
     APROBADO,
     REPROBADO,
     PENDIENTE
+
 }
