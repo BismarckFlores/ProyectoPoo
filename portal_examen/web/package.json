@@ -1,0 +1,10 @@
+{
+  "name": "portal-examen-web",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "npx serve -l 4000 .",
+    "dev": "npx serve -l 4000 ."
+  }
+}
+

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Portal Examen - Landing</title>
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/styles.css" rel="stylesheet">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-light border-bottom">
+      <div class="container">
+        <a class="navbar-brand fw-semibold" href="/">PortalExamen</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link active" aria-current="page" href="/">Inicio</a></li>
+            <li class="nav-item"><a class="nav-link" href="#features">Características</a></li>
+            <li class="nav-item"><a class="nav-link" href="/test/">Test</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="container">
+        <div class="row align-items-center g-4">
+          <div class="col-md-6">
+            <h1 class="display-5 fw-bold">Landing de PortalExamen</h1>
+            <p class="lead mb-4">Frontend en puerto 4000 y API en puerto 3000, separados para que el proyecto sea claro y mantenible.</p>
+            <a class="btn btn-primary btn-lg" href="/test/">Ir al Test</a>
+          </div>
+          <div class="col-md-6 text-center">
+            <img src="./img/placeholder.svg" class="img-fluid rounded shadow-sm" alt="Vista de Portal Examen">
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section id="features" class="py-5">
+      <div class="container">
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="border rounded p-4 h-100">
+              <div class="feature-icon mb-3">1</div>
+              <h5>Web separada</h5>
+              <p class="text-muted mb-0">HTML + Bootstrap sirviendo solo la parte visual.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="border rounded p-4 h-100">
+              <div class="feature-icon mb-3">2</div>
+              <h5>API separada</h5>
+              <p class="text-muted mb-0">Servicio Express conectado a PostgreSQL.</p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="border rounded p-4 h-100">
+              <div class="feature-icon mb-3">3</div>
+              <h5>Comunicación HTTP</h5>
+              <p class="text-muted mb-0">La web consume endpoints en <code>http://localhost:3000/api</code>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="./js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
+
