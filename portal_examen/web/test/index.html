@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Portal Examen - Test</title>
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-light border-bottom">
+      <div class="container">
+        <a class="navbar-brand fw-semibold" href="/">PortalExamen</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
+            <li class="nav-item"><a class="nav-link active" aria-current="page" href="/test/">Test</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container py-5">
+      <h1 class="mb-3">Test de ejemplo</h1>
+      <p class="text-muted">Este formulario calcula un puntaje y lo envía al API en <code>http://localhost:3000/api/submit</code>.</p>
+
+      <form id="quizForm" class="mt-4">
+        <div class="mb-3">
+          <label class="form-label" for="name">Nombre</label>
+          <input id="name" type="text" class="form-control" placeholder="Tu nombre">
+        </div>
+
+        <fieldset class="mb-3">
+          <legend class="fs-6">1) ¿Cuál es la capital de Francia?</legend>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="q1" id="q1a" value="a">
+            <label class="form-check-label" for="q1a">Berlín</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="q1" id="q1b" value="b">
+            <label class="form-check-label" for="q1b">Madrid</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="q1" id="q1c" value="c">
+            <label class="form-check-label" for="q1c">París</label>
+          </div>
+        </fieldset>
+
+        <div class="mb-4">
+          <label class="form-label" for="q2">2) 2 + 2 = ?</label>
+          <input id="q2" type="number" class="form-control" name="q2" placeholder="Tu respuesta">
+        </div>
+
+        <button type="button" class="btn btn-primary" id="sendBtn">Comprobar y enviar</button>
+      </form>
+
+      <div id="result" class="mt-4"></div>
+    </main>
+
+    <script>
+      const API_BASE_URL = 'http://localhost:3000/api';
+
+      async function submitScore(payload) {
+        const response = await fetch(`${API_BASE_URL}/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          throw new Error(body.error || `HTTP ${response.status}`);
+        }
+
+        return response.json();
+      }
+
+      document.getElementById('sendBtn').addEventListener('click', async () => {
+        const name = document.getElementById('name').value.trim() || 'Anónimo';
+        const q1 = document.querySelector('input[name="q1"]:checked')?.value;
+        const q2 = document.getElementById('q2').value.trim();
+
+        let score = 0;
+        if (q1 === 'c') score += 1;
+        if (q2 === '4') score += 1;
+
+        const resultEl = document.getElementById('result');
+        resultEl.innerHTML = '<div class="alert alert-info">Guardando resultado...</div>';
+
+        try {
+          const saved = await submitScore({ name, score });
+          resultEl.innerHTML = `<div class="alert alert-success">Puntaje: ${score}/2. Guardado con id ${saved.id}.</div>`;
+        } catch (error) {
+          resultEl.innerHTML = `<div class="alert alert-danger">No se pudo guardar: ${error.message}</div>`;
+        }
+      });
+    </script>
+    <script src="../js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
