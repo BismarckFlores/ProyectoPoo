@@ -1,14 +1,19 @@
 import { Router } from 'express';
-import { getPing } from '../controllers/pingController';
-import { SubmissionController } from '../controllers/submissionController';
+import { EvaluadoController } from "../controllers/EvaluadoController";
+import { AplicacionTestController } from "../controllers/AplicacionTestController";
 
-export function buildApiRouter(submissionController: SubmissionController): Router {
+export function buildApiRouter(
+    evaluadoController: EvaluadoController,
+    aplicacionController: AplicacionTestController,
+): Router {
   const router = Router();
 
-  router.get('/ping', getPing);
-  router.get('/submissions', submissionController.listSubmissions);
-  router.post('/submit', submissionController.createSubmission);
+  router.post("/evaluados", evaluadoController.crear)
+  router.post('/aplicaciones', aplicacionController.crear);
+  router.get('/aplicaciones/:id/forma', aplicacionController.obtenerForma);
+  router.post('/aplicaciones/:id/respuestas', aplicacionController.registrarRespuesta);
+  router.post('/aplicaciones/:id/calificar', aplicacionController.calificar);
+  router.get('/aplicaciones/:id/resultado', aplicacionController.obtenerResultado);
 
   return router;
 }
-
