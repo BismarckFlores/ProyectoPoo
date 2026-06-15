@@ -8,6 +8,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.localignore" />
       <excludeFolder url="file://$MODULE_DIR$/portal_examen/.claude" />
       <excludeFolder url="file://$MODULE_DIR$/portal_examen/.idea/dataSources" />
+      <excludeFolder url="file://$MODULE_DIR$/.codegraph" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
