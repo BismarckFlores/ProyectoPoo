@@ -32,4 +32,12 @@ export class ResultadoRepository {
         );
         return rows[0] ?? null;
     }
+
+    async findPuntuacionesByResultado(idResultado: number): Promise<Puntuacion[]> {
+        const { rows } = await this.pool.query<Puntuacion>(
+            'SELECT * FROM puntuacion WHERE id_resultado = $1',
+            [idResultado]
+        );
+        return rows;
+    }
 }
