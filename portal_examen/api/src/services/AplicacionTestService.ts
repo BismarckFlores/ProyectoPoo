@@ -64,6 +64,7 @@ export class AplicacionTestService {
             id_item: item.id_item,
             numero: item.numero,
             palabra_estimulo: item.palabra_estimulo,
+            opciones: (item.opciones ?? []).map(o => ({ letra: o.letra, texto: o.texto })),
         };
     }
 }

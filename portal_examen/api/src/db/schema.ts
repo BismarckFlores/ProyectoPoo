@@ -27,6 +27,12 @@ export async function ensureSchema(pool: Pool): Promise<void> {
       palabra_estimulo      VARCHAR(100),
       respuesta_correcta    CHAR(1)
     );
+    CREATE TABLE IF NOT EXISTS opcion (
+      id_opcion             SERIAL PRIMARY KEY,
+      id_item               INT NOT NULL REFERENCES item(id_item),
+      letra                 CHAR(1) NOT NULL,  -- A, B, C, D, E
+      texto                 VARCHAR(150)
+    );
     CREATE TABLE IF NOT EXISTS aplicacion_test (
     id_aplicacion           SERIAL PRIMARY KEY,
     id_evaluado             INT NOT NULL REFERENCES evaluado(id_evaluado),
