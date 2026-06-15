@@ -5,14 +5,21 @@ import { ResultadoDTO } from '../types/resultado';
 
 export class MotorCorreccion {
 
+  // Valida si una letra marcada coincide con la respuesta correcta de un ítem.
+  esCorrecta(item: Item, letra: string): boolean {
+    if (!item.respuesta_correcta) return false;
+    return item.respuesta_correcta.toUpperCase() === letra.toUpperCase();
+  }
+
+  // Puntuación directa de una forma: respuestas correctas dentro del rango de ítems.
   calcularPD(respuestas: Respuesta[], items: Item[], itemInicial: number, itemFinal: number): number {
-    const numerosEnRango = new Set(
+    const idsEnRango = new Set(
       items
         .filter(i => i.numero >= itemInicial && i.numero <= itemFinal)
         .map(i => i.id_item)
     );
 
-    return respuestas.filter(r => numerosEnRango.has(r.id_item) && r.es_correcta === true).length;
+    return respuestas.filter(r => idsEnRango.has(r.id_item) && r.es_correcta === true).length;
   }
 
   calcularVOCT(pdVoc1: number, pdVoc2: number): number {
@@ -35,18 +42,17 @@ export class MotorCorreccion {
     return 'Vocabulario bajo. Comprensión léxica por debajo del promedio.';
   }
 
+  // VOC1 = Forma A, VOC2 = Forma B, VOCT = VOC1 + VOC2.
   calificar(
-    idAplicacion: number,
     respuestas: Respuesta[],
-    items: Item[],
-    itemInicial: number,
-    itemFinal: number,
+    itemsA: Item[], itemInicialA: number, itemFinalA: number,
+    itemsB: Item[], itemInicialB: number, itemFinalB: number,
     entradasVoc1: EntradaBaremo[],
     entradasVoc2: EntradaBaremo[],
     entradasVoct: EntradaBaremo[]
   ): Omit<ResultadoDTO, 'id_resultado'> {
-    const pdVoc1 = this.calcularPD(respuestas, items, itemInicial, Math.floor((itemInicial + itemFinal) / 2));
-    const pdVoc2 = this.calcularPD(respuestas, items, Math.floor((itemInicial + itemFinal) / 2) + 1, itemFinal);
+    const pdVoc1 = this.calcularPD(respuestas, itemsA, itemInicialA, itemFinalA);
+    const pdVoc2 = this.calcularPD(respuestas, itemsB, itemInicialB, itemFinalB);
     const pdVoct = this.calcularVOCT(pdVoc1, pdVoc2);
 
     const puntuaciones = [

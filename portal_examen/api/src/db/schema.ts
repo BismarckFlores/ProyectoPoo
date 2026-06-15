@@ -30,7 +30,8 @@ export async function ensureSchema(pool: Pool): Promise<void> {
     CREATE TABLE IF NOT EXISTS aplicacion_test (
     id_aplicacion           SERIAL PRIMARY KEY,
     id_evaluado             INT NOT NULL REFERENCES evaluado(id_evaluado),
-    id_forma                INT NOT NULL REFERENCES forma_vocabulario(id_forma),
+    id_forma_a              INT NOT NULL REFERENCES forma_vocabulario(id_forma),
+    id_forma_b              INT NOT NULL REFERENCES forma_vocabulario(id_forma),
     fecha_examen            DATE,
     finalidad               VARCHAR(200),
     estado                  VARCHAR(20) NOT NULL DEFAULT 'ASIGNADO'

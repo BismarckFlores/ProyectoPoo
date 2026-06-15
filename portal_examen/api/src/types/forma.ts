@@ -15,3 +15,11 @@ export type Item = {
     palabra_estimulo: string | null;
     respuesta_correcta: string | null;
 };
+
+// Item sin la respuesta correcta — es lo que se le envía al frontend
+// para que el evaluado no pueda ver las respuestas en el código de la página.
+export type ItemPublico = {
+    id_item: number;
+    numero: number;
+    palabra_estimulo: string | null;
+};

@@ -1,14 +1,20 @@
 import { Pool } from "pg";
-import { AplicacionTest, CrearAplicacionDTO } from "../types/aplicacion";
+import { AplicacionTest } from "../types/aplicacion";
 
 export class AplicacionTestRepository {
     constructor(private readonly pool : Pool) {}
 
-    async create(dto: CrearAplicacionDTO): Promise<AplicacionTest> {
+    async create(
+        idEvaluado: number,
+        idFormaA: number,
+        idFormaB: number,
+        finalidad: string | null,
+        fechaExamen: string | null
+    ): Promise<AplicacionTest> {
         const { rows } = await this.pool.query<AplicacionTest>(
-            `INSERT INTO aplicacion_test (id_evaluado, id_forma, fecha_examen, finalidad, estado)                                                                                                                                       
-         VALUES ($1, $2, $3, $4, 'ASIGNADO') RETURNING *`,
-            [dto.id_evaluado, dto.id_forma, dto.fecha_examen ?? null, dto.finalidad ?? null]
+            `INSERT INTO aplicacion_test (id_evaluado, id_forma_a, id_forma_b, fecha_examen, finalidad, estado)
+             VALUES ($1, $2, $3, $4, $5, 'ASIGNADO') RETURNING *`,
+            [idEvaluado, idFormaA, idFormaB, fechaExamen, finalidad]
         );
         return rows[0];
     }

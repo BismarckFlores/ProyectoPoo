@@ -32,7 +32,7 @@ const resultadoRepo      = new ResultadoRepository(pool);
 const baremoRepo         = new BaremoRepository(pool);
 
 const evaluadoService    = new EvaluadoService(evaluadoRepo);
-const aplicacionService  = new AplicacionTestService(aplicacionRepo, evaluadoRepo, formaRepo, itemRepo, respuestaRepo);
+const aplicacionService  = new AplicacionTestService(aplicacionRepo, evaluadoRepo, formaRepo, itemRepo);
 const resultadoService   = new ResultadoService(aplicacionRepo, formaRepo, itemRepo, respuestaRepo, resultadoRepo, baremoRepo);
 
 const evaluadoController    = new EvaluadoController(evaluadoService);
