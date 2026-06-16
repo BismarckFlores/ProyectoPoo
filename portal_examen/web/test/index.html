@@ -28,11 +28,11 @@
         <aside class="col-lg-4">
           <div class="exam-sidebar">
             <span class="eyebrow">Aplicacion de vocabulario</span>
-            <h1>Registro, examen y resultado</h1>
-            <p class="text-secondary">Completa los datos del evaluado, crea la aplicacion y envia sus respuestas al API.</p>
+            <h1>Registro, formas y resultado</h1>
+            <p class="text-secondary">El examen se carga desde la API, se responde por forma y se califica al finalizar.</p>
             <div class="progress-steps">
               <div class="progress-step active" data-step-indicator="registro"><span>1</span><strong>Registro</strong></div>
-              <div class="progress-step" data-step-indicator="examen"><span>2</span><strong>Examen</strong></div>
+              <div class="progress-step" data-step-indicator="forma"><span>2</span><strong>Forma</strong></div>
               <div class="progress-step" data-step-indicator="resultado"><span>3</span><strong>Resultado</strong></div>
             </div>
           </div>
@@ -40,9 +40,9 @@
 
         <section class="col-lg-8">
           <div class="exam-workspace">
-            <div id="messageArea"></div>
+            <div id="alert" class="d-none"></div>
 
-            <section class="workspace-section" id="registroSection">
+            <section class="workspace-section" id="screen-registro">
               <div class="section-title-row">
                 <div>
                   <span class="eyebrow">Paso 1</span>
@@ -51,26 +51,26 @@
                 <span class="badge text-bg-light">POST /evaluados</span>
               </div>
 
-              <form id="evaluadoForm" class="row g-3">
+              <form id="formRegistro" class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label" for="nombre">Nombres</label>
-                  <input id="nombre" name="nombre" type="text" class="form-control" placeholder="Ej. Maria Jose" required>
+                  <input id="nombre" type="text" class="form-control" placeholder="Ej. Maria Jose" required>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="primer_apellido">Primer apellido</label>
-                  <input id="primer_apellido" name="primer_apellido" type="text" class="form-control" placeholder="Ej. Lopez" required>
+                  <input id="primer_apellido" type="text" class="form-control" placeholder="Ej. Sanchez" required>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="segundo_apellido">Segundo apellido</label>
-                  <input id="segundo_apellido" name="segundo_apellido" type="text" class="form-control" placeholder="Opcional">
+                  <input id="segundo_apellido" type="text" class="form-control" placeholder="Opcional">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="fecha_nacimiento">Fecha de nacimiento</label>
-                  <input id="fecha_nacimiento" name="fecha_nacimiento" type="date" class="form-control">
+                  <input id="fecha_nacimiento" type="date" class="form-control">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="sexo">Sexo</label>
-                  <select id="sexo" name="sexo" class="form-select">
+                  <select id="sexo" class="form-select">
                     <option value="">Seleccionar</option>
                     <option value="F">Femenino</option>
                     <option value="M">Masculino</option>
@@ -78,47 +78,54 @@
                 </div>
                 <div class="col-md-6">
                   <label class="form-label" for="estudios">Estudios</label>
-                  <input id="estudios" name="estudios" type="text" class="form-control" placeholder="Ej. Secundaria">
+                  <input id="estudios" type="text" class="form-control" placeholder="Ej. Secundaria">
                 </div>
                 <div class="col-12">
                   <label class="form-label" for="finalidad">Finalidad</label>
-                  <textarea id="finalidad" name="finalidad" class="form-control" rows="2" placeholder="Ej. Evaluacion academica"></textarea>
+                  <textarea id="finalidad" class="form-control" rows="2" placeholder="Ej. Evaluacion academica"></textarea>
                 </div>
                 <div class="col-12 d-flex flex-wrap gap-2">
-                  <button class="btn btn-primary" type="submit" id="startBtn">Crear aplicacion</button>
-                  <button class="btn btn-outline-secondary" type="reset">Limpiar</button>
+                  <button class="btn btn-primary btn-lg" type="submit" id="btnComenzar">Comenzar test</button>
+                  <button class="btn btn-outline-secondary btn-lg" type="reset">Limpiar</button>
                 </div>
               </form>
             </section>
 
-            <section class="workspace-section d-none" id="examenSection">
+            <section class="workspace-section d-none" id="screen-forma">
               <div class="section-title-row">
                 <div>
-                  <span class="eyebrow">Paso 2</span>
-                  <h2>Responder examen</h2>
+                  <span class="eyebrow" id="formaPaso">Forma</span>
+                  <h2 id="formaTitulo"></h2>
                 </div>
-                <span class="badge text-bg-light" id="applicationBadge">Aplicacion</span>
+                <span class="badge text-bg-primary d-none" id="timer">00:00</span>
               </div>
-              <div class="exam-meta" id="examMeta"></div>
-              <form id="answersForm">
-                <div id="questionsContainer" class="questions-list"></div>
-                <div class="d-flex flex-wrap gap-2 mt-4">
-                  <button class="btn btn-primary" type="submit" id="submitAnswersBtn">Calificar respuestas</button>
-                  <button class="btn btn-outline-dark" type="button" id="reloadFormsBtn">Recargar formas</button>
-                </div>
-              </form>
+              <p id="formaInstrucciones" class="text-secondary"></p>
+              <div id="itemsContainer" class="questions-list"></div>
+              <button id="btnSiguiente" class="btn btn-primary btn-lg mt-4" type="button">Siguiente forma</button>
             </section>
 
-            <section class="workspace-section d-none" id="resultadoSection">
+            <section class="workspace-section d-none" id="screen-resultado">
               <div class="section-title-row">
                 <div>
                   <span class="eyebrow">Paso 3</span>
-                  <h2>Resultado</h2>
+                  <h2>Resultados</h2>
                 </div>
                 <span class="badge text-bg-success">Calificado</span>
               </div>
-              <div id="resultPanel"></div>
-              <button class="btn btn-outline-dark mt-4" type="button" id="newExamBtn">Nueva aplicacion</button>
+              <div id="resultadoInterpretacion" class="result-summary"></div>
+              <div class="table-responsive mt-3">
+                <table class="table align-middle">
+                  <thead>
+                    <tr>
+                      <th>Factor</th>
+                      <th>Puntuacion directa</th>
+                      <th>Puntuacion tipica</th>
+                    </tr>
+                  </thead>
+                  <tbody id="resultadoTabla"></tbody>
+                </table>
+              </div>
+              <button class="btn btn-outline-dark mt-3" type="button" onclick="location.reload()">Nueva aplicacion</button>
             </section>
           </div>
         </section>
@@ -127,182 +134,205 @@
 
     <script>
       const API_BASE_URL = 'http://localhost:3000/api';
-      const state = { evaluado: null, aplicacion: null, formas: null };
-      const $ = (selector) => document.querySelector(selector);
-      const messageArea = $('#messageArea');
+      const $ = (id) => document.getElementById(id);
+      const sesion = {
+        idEvaluado: null,
+        idAplicacion: null,
+        formas: [],
+        formaActual: 0,
+        respuestas: {},
+        timerId: null
+      };
 
-      function showMessage(type, text) {
-        messageArea.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${text}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button></div>`;
-      }
-
-      function setLoading(button, loading, text) {
-        button.disabled = loading;
-        if (loading) {
-          button.dataset.originalText = button.textContent;
-          button.textContent = text;
-        } else {
-          button.textContent = button.dataset.originalText || button.textContent;
+      async function api(metodo, ruta, body) {
+        const res = await fetch(`${API_BASE_URL}${ruta}`, {
+          method: metodo,
+          headers: { 'Content-Type': 'application/json' },
+          body: body ? JSON.stringify(body) : undefined
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || `HTTP ${res.status}`);
         }
+        return res.json();
       }
 
-      async function api(path, options = {}) {
-        const response = await fetch(`${API_BASE_URL}${path}`, {
-          ...options,
-          headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }
-        });
-        const body = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`);
-        return body;
+      function mostrarAlerta(tipo, texto) {
+        $('alert').className = `alert alert-${tipo}`;
+        $('alert').textContent = texto;
       }
 
-      function payloadFromForm(form) {
-        const data = new FormData(form);
-        const payload = {
-          nombre: data.get('nombre')?.trim(),
-          primer_apellido: data.get('primer_apellido')?.trim(),
-          segundo_apellido: data.get('segundo_apellido')?.trim(),
-          fecha_nacimiento: data.get('fecha_nacimiento'),
-          sexo: data.get('sexo'),
-          estudios: data.get('estudios')?.trim()
-        };
-        Object.keys(payload).forEach((key) => !payload[key] && delete payload[key]);
-        return payload;
+      function limpiarAlerta() {
+        $('alert').className = 'd-none';
+        $('alert').textContent = '';
       }
 
-      function activateStep(step) {
-        const order = ['registro', 'examen', 'resultado'];
+      function mostrarPantalla(id) {
+        ['screen-registro', 'screen-forma', 'screen-resultado'].forEach((screen) => $(screen).classList.add('d-none'));
+        $(id).classList.remove('d-none');
+        window.scrollTo(0, 0);
+      }
+
+      function activarPaso(paso) {
+        const orden = ['registro', 'forma', 'resultado'];
         document.querySelectorAll('.progress-step').forEach((el) => {
-          const current = el.dataset.stepIndicator;
-          el.classList.toggle('active', current === step);
-          el.classList.toggle('done', order.indexOf(current) < order.indexOf(step));
+          const actual = el.dataset.stepIndicator;
+          el.classList.toggle('active', actual === paso);
+          el.classList.toggle('done', orden.indexOf(actual) < orden.indexOf(paso));
         });
       }
 
-      function showSection(sectionId) {
-        ['registroSection', 'examenSection', 'resultadoSection'].forEach((id) => {
-          document.getElementById(id).classList.toggle('d-none', id !== sectionId);
-        });
+      function valorOpcional(id) {
+        return $(id).value.trim() || undefined;
       }
 
-      function renderForms() {
-        const formas = [state.formas.forma_a, state.formas.forma_b].filter(Boolean);
-        const allItems = formas.flatMap((entry) => entry.items.map((item) => ({ ...item, formaTitulo: entry.forma.titulo })));
+      $('formRegistro').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        limpiarAlerta();
+        $('btnComenzar').disabled = true;
+        $('btnComenzar').textContent = 'Cargando...';
+        try {
+          const evaluado = await api('POST', '/evaluados', {
+            nombre: $('nombre').value.trim(),
+            primer_apellido: $('primer_apellido').value.trim(),
+            segundo_apellido: valorOpcional('segundo_apellido'),
+            fecha_nacimiento: valorOpcional('fecha_nacimiento'),
+            sexo: valorOpcional('sexo'),
+            estudios: valorOpcional('estudios')
+          });
+          sesion.idEvaluado = evaluado.id_evaluado;
 
-        $('#applicationBadge').textContent = `Aplicacion #${state.aplicacion.id_aplicacion}`;
-        $('#examMeta').innerHTML = formas.map((entry) => `<div><span>${entry.forma.tipo}</span><strong>${entry.forma.titulo}</strong><small>${entry.items.length} items</small></div>`).join('');
-        $('#questionsContainer').innerHTML = allItems.map((item, index) => `
-          <article class="question-card">
-            <div class="question-header"><span>Pregunta ${index + 1}</span><small>${item.formaTitulo}</small></div>
-            <h3>${item.palabra_estimulo || 'Item sin palabra estimulo'}</h3>
+          const aplicacion = await api('POST', '/aplicaciones', {
+            id_evaluado: sesion.idEvaluado,
+            finalidad: valorOpcional('finalidad')
+          });
+          sesion.idAplicacion = aplicacion.id_aplicacion;
+
+          const data = await api('GET', `/aplicaciones/${sesion.idAplicacion}/formas`);
+          sesion.formas = [data.forma_a, data.forma_b].filter(Boolean);
+          sesion.formaActual = 0;
+          activarPaso('forma');
+          renderForma();
+        } catch (err) {
+          mostrarAlerta('danger', 'No se pudo iniciar el test: ' + err.message);
+        } finally {
+          $('btnComenzar').disabled = false;
+          $('btnComenzar').textContent = 'Comenzar test';
+        }
+      });
+
+      function renderForma() {
+        const actual = sesion.formas[sesion.formaActual];
+        if (!actual) {
+          mostrarAlerta('danger', 'La API no devolvio formas para esta aplicacion.');
+          mostrarPantalla('screen-registro');
+          return;
+        }
+
+        const { forma, items } = actual;
+        const esUltima = sesion.formaActual === sesion.formas.length - 1;
+        $('formaPaso').textContent = `Forma ${sesion.formaActual + 1} de ${sesion.formas.length}`;
+        $('formaTitulo').textContent = forma.titulo || `Forma ${forma.tipo}`;
+        $('formaInstrucciones').textContent = forma.instrucciones || 'Selecciona una opcion por cada item.';
+        $('btnSiguiente').textContent = esUltima ? 'Finalizar y enviar' : 'Siguiente forma';
+        $('itemsContainer').innerHTML = items.map((it) => `
+          <fieldset class="question-card">
+            <legend class="question-header">
+              <span>Item ${it.numero}</span>
+              <small>${forma.tipo}</small>
+            </legend>
+            <h3 class="text-uppercase">${it.palabra_estimulo || ''}</h3>
             <div class="option-grid">
-              ${item.opciones.map((opcion) => `
-                <label class="option-choice">
-                  <input type="radio" name="item_${item.id_item}" value="${opcion.letra}" required>
-                  <span>${opcion.letra}</span>
-                  <strong>${opcion.texto || 'Sin texto'}</strong>
+              ${(it.opciones || []).map((op) => `
+                <label class="option-choice" for="item_${it.id_item}_${op.letra}">
+                  <input class="form-check-input" type="radio" name="item_${it.id_item}" id="item_${it.id_item}_${op.letra}" value="${op.letra}" ${sesion.respuestas[it.id_item] === op.letra ? 'checked' : ''}>
+                  <span>${op.letra}</span>
+                  <strong>${op.texto || ''}</strong>
                 </label>
               `).join('')}
             </div>
-          </article>
+          </fieldset>
         `).join('');
+        mostrarPantalla('screen-forma');
+        iniciarTimer(forma.tiempo_limite_seg);
       }
 
-      async function loadForms() {
-        state.formas = await api(`/aplicaciones/${state.aplicacion.id_aplicacion}/formas`);
-        renderForms();
-        showSection('examenSection');
-        activateStep('examen');
-      }
-
-      function collectAnswers() {
-        return Array.from(document.querySelectorAll('#questionsContainer input[type="radio"]:checked')).map((input) => ({
-          id_item: Number(input.name.replace('item_', '')),
-          letra_marcada: input.value
-        }));
-      }
-
-      function renderResult(resultado) {
-        const rows = (resultado.puntuaciones || []).map((p) => `<tr><td>${p.factor}</td><td>${p.puntuacion_directa}</td><td>${p.puntuacion_tipica}</td></tr>`).join('');
-        $('#resultPanel').innerHTML = `
-          <div class="result-summary">
-            <div><span>Resultado</span><strong>#${resultado.id_resultado}</strong></div>
-            <p>${resultado.texto_interpretativo || 'Resultado guardado correctamente.'}</p>
-          </div>
-          <div class="table-responsive mt-3">
-            <table class="table align-middle">
-              <thead><tr><th>Factor</th><th>Puntuacion directa</th><th>Puntuacion tipica</th></tr></thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>`;
-      }
-
-      $('#evaluadoForm').addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const button = $('#startBtn');
-        setLoading(button, true, 'Creando...');
-        messageArea.innerHTML = '';
-        try {
-          state.evaluado = await api('/evaluados', { method: 'POST', body: JSON.stringify(payloadFromForm(event.currentTarget)) });
-          state.aplicacion = await api('/aplicaciones', {
-            method: 'POST',
-            body: JSON.stringify({ id_evaluado: state.evaluado.id_evaluado, finalidad: $('#finalidad').value.trim() || undefined })
-          });
-          await loadForms();
-          showMessage('success', 'Aplicacion creada y formas cargadas correctamente.');
-        } catch (error) {
-          showMessage('danger', `No se pudo iniciar la aplicacion: ${error.message}`);
-        } finally {
-          setLoading(button, false);
-        }
-      });
-
-      $('#answersForm').addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const button = $('#submitAnswersBtn');
-        const respuestas = collectAnswers();
-        const totalItems = document.querySelectorAll('.question-card').length;
-        if (respuestas.length !== totalItems) {
-          showMessage('warning', 'Responde todos los items antes de calificar.');
+      function iniciarTimer(segundos) {
+        const badge = $('timer');
+        if (sesion.timerId) clearInterval(sesion.timerId);
+        if (!segundos || segundos <= 0) {
+          badge.classList.add('d-none');
           return;
         }
-        setLoading(button, true, 'Calificando...');
-        try {
-          const resultado = await api(`/aplicaciones/${state.aplicacion.id_aplicacion}/calificar`, { method: 'POST', body: JSON.stringify({ respuestas }) });
-          renderResult(resultado);
-          showSection('resultadoSection');
-          activateStep('resultado');
-          showMessage('success', 'Resultado generado correctamente.');
-        } catch (error) {
-          showMessage('danger', `No se pudo calificar: ${error.message}`);
-        } finally {
-          setLoading(button, false);
-        }
-      });
+        let restante = segundos;
+        badge.classList.remove('d-none');
+        const pintar = () => {
+          const m = String(Math.floor(restante / 60)).padStart(2, '0');
+          const s = String(restante % 60).padStart(2, '0');
+          badge.textContent = `${m}:${s}`;
+        };
+        pintar();
+        sesion.timerId = setInterval(() => {
+          restante--;
+          pintar();
+          if (restante <= 0) avanzarForma();
+        }, 1000);
+      }
 
-      $('#reloadFormsBtn').addEventListener('click', async () => {
-        const button = $('#reloadFormsBtn');
-        setLoading(button, true, 'Recargando...');
-        try {
-          await loadForms();
-          showMessage('info', 'Formas recargadas desde la API.');
-        } catch (error) {
-          showMessage('danger', `No se pudieron recargar las formas: ${error.message}`);
-        } finally {
-          setLoading(button, false);
-        }
-      });
+      function guardarRespuestasForma() {
+        const { items } = sesion.formas[sesion.formaActual];
+        items.forEach((it) => {
+          const marcado = document.querySelector(`input[name="item_${it.id_item}"]:checked`);
+          if (marcado) sesion.respuestas[it.id_item] = marcado.value;
+        });
+      }
 
-      $('#newExamBtn').addEventListener('click', () => {
-        state.evaluado = null;
-        state.aplicacion = null;
-        state.formas = null;
-        $('#evaluadoForm').reset();
-        $('#questionsContainer').innerHTML = '';
-        $('#resultPanel').innerHTML = '';
-        messageArea.innerHTML = '';
-        showSection('registroSection');
-        activateStep('registro');
-      });
+      async function avanzarForma() {
+        if (sesion.timerId) clearInterval(sesion.timerId);
+        guardarRespuestasForma();
+        if (sesion.formaActual < sesion.formas.length - 1) {
+          sesion.formaActual++;
+          renderForma();
+          return;
+        }
+        await enviarYcalificar();
+      }
+
+      $('btnSiguiente').addEventListener('click', avanzarForma);
+
+      async function enviarYcalificar() {
+        limpiarAlerta();
+        $('btnSiguiente').disabled = true;
+        $('btnSiguiente').textContent = 'Calificando...';
+        try {
+          const respuestas = Object.entries(sesion.respuestas).map(([id_item, letra_marcada]) => ({
+            id_item: Number(id_item),
+            letra_marcada
+          }));
+          const resultado = await api('POST', `/aplicaciones/${sesion.idAplicacion}/calificar`, { respuestas });
+          renderResultado(resultado);
+        } catch (err) {
+          mostrarAlerta('danger', 'No se pudo calificar el test: ' + err.message);
+        } finally {
+          $('btnSiguiente').disabled = false;
+        }
+      }
+
+      function renderResultado(resultado) {
+        $('resultadoInterpretacion').innerHTML = `
+          <div><span>Interpretacion</span><strong>Resultado #${resultado.id_resultado}</strong></div>
+          <p>${resultado.texto_interpretativo || 'Test calificado.'}</p>
+        `;
+        $('resultadoTabla').innerHTML = (resultado.puntuaciones || []).map((p) => `
+          <tr>
+            <td>${p.factor}</td>
+            <td>${p.puntuacion_directa}</td>
+            <td>${p.puntuacion_tipica}</td>
+          </tr>
+        `).join('');
+        activarPaso('resultado');
+        mostrarPantalla('screen-resultado');
+      }
     </script>
     <script src="../js/bootstrap.bundle.min.js"></script>
   </body>
