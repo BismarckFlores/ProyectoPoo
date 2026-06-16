@@ -28,12 +28,13 @@
         <aside class="col-lg-4">
           <div class="exam-sidebar">
             <span class="eyebrow">Aplicacion de vocabulario</span>
-            <h1>Registro, examen y resultado</h1>
-            <p class="text-secondary">Completa los datos del evaluado, crea la aplicacion y envia sus respuestas al API.</p>
+            <h1>Registro, formas y resultado</h1>
+            <p class="text-secondary">Completa los datos del evaluado y responde cada forma del examen por separado.</p>
             <div class="progress-steps">
               <div class="progress-step active" data-step-indicator="registro"><span>1</span><strong>Registro</strong></div>
-              <div class="progress-step" data-step-indicator="examen"><span>2</span><strong>Examen</strong></div>
-              <div class="progress-step" data-step-indicator="resultado"><span>3</span><strong>Resultado</strong></div>
+              <div class="progress-step" data-step-indicator="forma-a"><span>2</span><strong>Forma A</strong></div>
+              <div class="progress-step" data-step-indicator="forma-b"><span>3</span><strong>Forma B</strong></div>
+              <div class="progress-step" data-step-indicator="resultado"><span>4</span><strong>Resultado</strong></div>
             </div>
           </div>
         </aside>
@@ -85,26 +86,28 @@
                   <textarea id="finalidad" name="finalidad" class="form-control" rows="2" placeholder="Ej. Evaluacion academica"></textarea>
                 </div>
                 <div class="col-12 d-flex flex-wrap gap-2">
-                  <button class="btn btn-primary" type="submit" id="startBtn">Crear aplicacion</button>
+                  <button class="btn btn-primary" type="submit" id="startBtn">Comenzar test</button>
                   <button class="btn btn-outline-secondary" type="reset">Limpiar</button>
                 </div>
               </form>
             </section>
 
-            <section class="workspace-section d-none" id="examenSection">
+            <section class="workspace-section d-none" id="formaSection">
               <div class="section-title-row">
                 <div>
-                  <span class="eyebrow">Paso 2</span>
-                  <h2>Responder examen</h2>
+                  <span class="eyebrow" id="formaPaso">Paso 2</span>
+                  <h2 id="formaTitulo">Forma</h2>
                 </div>
-                <span class="badge text-bg-light" id="applicationBadge">Aplicacion</span>
+                <div class="d-flex flex-column align-items-start align-items-sm-end gap-2">
+                  <span class="badge text-bg-light" id="applicationBadge">Aplicacion</span>
+                  <span class="timer-badge d-none" id="timer">00:00</span>
+                </div>
               </div>
-              <div class="exam-meta" id="examMeta"></div>
+              <p class="text-secondary" id="formaInstrucciones"></p>
               <form id="answersForm">
                 <div id="questionsContainer" class="questions-list"></div>
                 <div class="d-flex flex-wrap gap-2 mt-4">
-                  <button class="btn btn-primary" type="submit" id="submitAnswersBtn">Calificar respuestas</button>
-                  <button class="btn btn-outline-dark" type="button" id="reloadFormsBtn">Recargar formas</button>
+                  <button class="btn btn-primary" type="submit" id="nextBtn">Siguiente forma</button>
                 </div>
               </form>
             </section>
@@ -112,7 +115,7 @@
             <section class="workspace-section d-none" id="resultadoSection">
               <div class="section-title-row">
                 <div>
-                  <span class="eyebrow">Paso 3</span>
+                  <span class="eyebrow">Paso 4</span>
                   <h2>Resultado</h2>
                 </div>
                 <span class="badge text-bg-success">Calificado</span>
@@ -127,12 +130,23 @@
 
     <script>
       const API_BASE_URL = 'http://localhost:3000/api';
-      const state = { evaluado: null, aplicacion: null, formas: null };
+      const state = {
+        idEvaluado: null,
+        idAplicacion: null,
+        formas: [],
+        formaActual: 0,
+        respuestas: {},
+        timerId: null
+      };
       const $ = (selector) => document.querySelector(selector);
       const messageArea = $('#messageArea');
 
       function showMessage(type, text) {
         messageArea.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${text}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button></div>`;
+      }
+
+      function clearMessage() {
+        messageArea.innerHTML = '';
       }
 
       function setLoading(button, loading, text) {
@@ -145,14 +159,15 @@
         }
       }
 
-      async function api(path, options = {}) {
+      async function api(method, path, body) {
         const response = await fetch(`${API_BASE_URL}${path}`, {
-          ...options,
-          headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: body ? JSON.stringify(body) : undefined
         });
-        const body = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`);
-        return body;
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+        return data;
       }
 
       function payloadFromForm(form) {
@@ -170,7 +185,7 @@
       }
 
       function activateStep(step) {
-        const order = ['registro', 'examen', 'resultado'];
+        const order = ['registro', 'forma-a', 'forma-b', 'resultado'];
         document.querySelectorAll('.progress-step').forEach((el) => {
           const current = el.dataset.stepIndicator;
           el.classList.toggle('active', current === step);
@@ -179,95 +194,129 @@
       }
 
       function showSection(sectionId) {
-        ['registroSection', 'examenSection', 'resultadoSection'].forEach((id) => {
+        ['registroSection', 'formaSection', 'resultadoSection'].forEach((id) => {
           document.getElementById(id).classList.toggle('d-none', id !== sectionId);
         });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
-      function renderForms() {
-        const formas = [state.formas.forma_a, state.formas.forma_b].filter(Boolean);
-        const allItems = formas.flatMap((entry) => entry.items.map((item) => ({ ...item, formaTitulo: entry.forma.titulo })));
+      function escapeHtml(value) {
+        return String(value ?? '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;');
+      }
 
-        $('#applicationBadge').textContent = `Aplicacion #${state.aplicacion.id_aplicacion}`;
-        $('#examMeta').innerHTML = formas.map((entry) => `<div><span>${entry.forma.tipo}</span><strong>${entry.forma.titulo}</strong><small>${entry.items.length} items</small></div>`).join('');
-        $('#questionsContainer').innerHTML = allItems.map((item, index) => `
+      function renderForma() {
+        const entry = state.formas[state.formaActual];
+        const { forma, items } = entry;
+        const isLast = state.formaActual === state.formas.length - 1;
+        const stepName = state.formaActual === 0 ? 'forma-a' : 'forma-b';
+
+        $('#applicationBadge').textContent = `Aplicacion #${state.idAplicacion}`;
+        $('#formaPaso').textContent = `Paso ${state.formaActual + 2}`;
+        $('#formaTitulo').textContent = forma.titulo || `Forma ${forma.tipo || state.formaActual + 1}`;
+        $('#formaInstrucciones').textContent = forma.instrucciones || 'Selecciona una opcion por cada item.';
+        $('#nextBtn').textContent = isLast ? 'Finalizar y enviar' : 'Siguiente forma';
+
+        $('#questionsContainer').innerHTML = items.map((item) => `
           <article class="question-card">
-            <div class="question-header"><span>Pregunta ${index + 1}</span><small>${item.formaTitulo}</small></div>
-            <h3>${item.palabra_estimulo || 'Item sin palabra estimulo'}</h3>
+            <div class="question-header">
+              <span>Item ${escapeHtml(item.numero)}</span>
+              <small>${escapeHtml(forma.tipo || 'Forma')}</small>
+            </div>
+            <h3>${escapeHtml(item.palabra_estimulo || 'Item sin palabra estimulo')}</h3>
             <div class="option-grid">
-              ${item.opciones.map((opcion) => `
-                <label class="option-choice">
-                  <input type="radio" name="item_${item.id_item}" value="${opcion.letra}" required>
-                  <span>${opcion.letra}</span>
-                  <strong>${opcion.texto || 'Sin texto'}</strong>
-                </label>
-              `).join('')}
+              ${(item.opciones || []).map((opcion) => {
+                const inputId = `item_${item.id_item}_${opcion.letra}`;
+                const checked = state.respuestas[item.id_item] === opcion.letra ? 'checked' : '';
+                return `
+                  <label class="option-choice" for="${escapeHtml(inputId)}">
+                    <input id="${escapeHtml(inputId)}" type="radio" name="item_${item.id_item}" value="${escapeHtml(opcion.letra)}" ${checked} required>
+                    <span>${escapeHtml(opcion.letra)}</span>
+                    <strong>${escapeHtml(opcion.texto || 'Sin texto')}</strong>
+                  </label>`;
+              }).join('')}
             </div>
           </article>
         `).join('');
+
+        clearMessage();
+        showSection('formaSection');
+        activateStep(stepName);
+        startTimer(forma.tiempo_limite_seg);
       }
 
-      async function loadForms() {
-        state.formas = await api(`/aplicaciones/${state.aplicacion.id_aplicacion}/formas`);
-        renderForms();
-        showSection('examenSection');
-        activateStep('examen');
-      }
-
-      function collectAnswers() {
-        return Array.from(document.querySelectorAll('#questionsContainer input[type="radio"]:checked')).map((input) => ({
-          id_item: Number(input.name.replace('item_', '')),
-          letra_marcada: input.value
-        }));
-      }
-
-      function renderResult(resultado) {
-        const rows = (resultado.puntuaciones || []).map((p) => `<tr><td>${p.factor}</td><td>${p.puntuacion_directa}</td><td>${p.puntuacion_tipica}</td></tr>`).join('');
-        $('#resultPanel').innerHTML = `
-          <div class="result-summary">
-            <div><span>Resultado</span><strong>#${resultado.id_resultado}</strong></div>
-            <p>${resultado.texto_interpretativo || 'Resultado guardado correctamente.'}</p>
-          </div>
-          <div class="table-responsive mt-3">
-            <table class="table align-middle">
-              <thead><tr><th>Factor</th><th>Puntuacion directa</th><th>Puntuacion tipica</th></tr></thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>`;
-      }
-
-      $('#evaluadoForm').addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const button = $('#startBtn');
-        setLoading(button, true, 'Creando...');
-        messageArea.innerHTML = '';
-        try {
-          state.evaluado = await api('/evaluados', { method: 'POST', body: JSON.stringify(payloadFromForm(event.currentTarget)) });
-          state.aplicacion = await api('/aplicaciones', {
-            method: 'POST',
-            body: JSON.stringify({ id_evaluado: state.evaluado.id_evaluado, finalidad: $('#finalidad').value.trim() || undefined })
-          });
-          await loadForms();
-          showMessage('success', 'Aplicacion creada y formas cargadas correctamente.');
-        } catch (error) {
-          showMessage('danger', `No se pudo iniciar la aplicacion: ${error.message}`);
-        } finally {
-          setLoading(button, false);
-        }
-      });
-
-      $('#answersForm').addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const button = $('#submitAnswersBtn');
-        const respuestas = collectAnswers();
-        const totalItems = document.querySelectorAll('.question-card').length;
-        if (respuestas.length !== totalItems) {
-          showMessage('warning', 'Responde todos los items antes de calificar.');
+      function startTimer(seconds) {
+        const badge = $('#timer');
+        if (state.timerId) clearInterval(state.timerId);
+        if (!seconds || seconds <= 0) {
+          badge.classList.add('d-none');
           return;
         }
+
+        let remaining = seconds;
+        badge.classList.remove('d-none');
+        const paint = () => {
+          const minutes = String(Math.floor(remaining / 60)).padStart(2, '0');
+          const secondsLeft = String(remaining % 60).padStart(2, '0');
+          badge.textContent = `${minutes}:${secondsLeft}`;
+        };
+        paint();
+        state.timerId = setInterval(() => {
+          remaining -= 1;
+          paint();
+          if (remaining <= 0) {
+            clearInterval(state.timerId);
+            advanceForma();
+          }
+        }, 1000);
+      }
+
+      function saveCurrentAnswers() {
+        const current = state.formas[state.formaActual];
+        current.items.forEach((item) => {
+          const selected = document.querySelector(`input[name="item_${item.id_item}"]:checked`);
+          if (selected) state.respuestas[item.id_item] = selected.value;
+        });
+      }
+
+      function currentFormaIsComplete() {
+        const current = state.formas[state.formaActual];
+        return current.items.every((item) => document.querySelector(`input[name="item_${item.id_item}"]:checked`));
+      }
+
+      async function advanceForma() {
+        if (state.timerId) clearInterval(state.timerId);
+        saveCurrentAnswers();
+
+        if (!currentFormaIsComplete()) {
+          showMessage('warning', 'Responde todos los items antes de continuar.');
+          startTimer(state.formas[state.formaActual].forma.tiempo_limite_seg);
+          return;
+        }
+
+        if (state.formaActual < state.formas.length - 1) {
+          state.formaActual += 1;
+          renderForma();
+          return;
+        }
+
+        await submitAndGrade();
+      }
+
+      async function submitAndGrade() {
+        const button = $('#nextBtn');
+        const respuestas = Object.entries(state.respuestas).map(([id_item, letra_marcada]) => ({
+          id_item: Number(id_item),
+          letra_marcada
+        }));
+
         setLoading(button, true, 'Calificando...');
         try {
-          const resultado = await api(`/aplicaciones/${state.aplicacion.id_aplicacion}/calificar`, { method: 'POST', body: JSON.stringify({ respuestas }) });
+          const resultado = await api('POST', `/aplicaciones/${state.idAplicacion}/calificar`, { respuestas });
           renderResult(resultado);
           showSection('resultadoSection');
           activateStep('resultado');
@@ -277,29 +326,76 @@
         } finally {
           setLoading(button, false);
         }
-      });
+      }
 
-      $('#reloadFormsBtn').addEventListener('click', async () => {
-        const button = $('#reloadFormsBtn');
-        setLoading(button, true, 'Recargando...');
+      function renderResult(resultado) {
+        const rows = (resultado.puntuaciones || []).map((p) => `
+          <tr>
+            <td>${escapeHtml(p.factor)}</td>
+            <td>${escapeHtml(p.puntuacion_directa)}</td>
+            <td>${escapeHtml(p.puntuacion_tipica)}</td>
+          </tr>
+        `).join('');
+
+        $('#resultPanel').innerHTML = `
+          <div class="result-summary">
+            <div><span>Interpretacion</span><strong>#${escapeHtml(resultado.id_resultado)}</strong></div>
+            <p>${escapeHtml(resultado.texto_interpretativo || 'Resultado guardado correctamente.')}</p>
+          </div>
+          <div class="table-responsive mt-3">
+            <table class="table align-middle">
+              <thead><tr><th>Factor</th><th>Puntuacion directa</th><th>Percentil / tipica</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>`;
+      }
+
+      $('#evaluadoForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = $('#startBtn');
+        setLoading(button, true, 'Creando...');
+        clearMessage();
+
         try {
-          await loadForms();
-          showMessage('info', 'Formas recargadas desde la API.');
+          const evaluado = await api('POST', '/evaluados', payloadFromForm(event.currentTarget));
+          state.idEvaluado = evaluado.id_evaluado;
+
+          const aplicacion = await api('POST', '/aplicaciones', {
+            id_evaluado: state.idEvaluado,
+            finalidad: $('#finalidad').value.trim() || undefined
+          });
+          state.idAplicacion = aplicacion.id_aplicacion;
+
+          const data = await api('GET', `/aplicaciones/${state.idAplicacion}/formas`);
+          state.formas = [data.forma_a, data.forma_b].filter(Boolean);
+          state.formaActual = 0;
+          state.respuestas = {};
+
+          if (state.formas.length === 0) throw new Error('La API no devolvio formas para esta aplicacion.');
+          renderForma();
         } catch (error) {
-          showMessage('danger', `No se pudieron recargar las formas: ${error.message}`);
+          showMessage('danger', `No se pudo iniciar el test: ${error.message}`);
         } finally {
           setLoading(button, false);
         }
       });
 
+      $('#answersForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        await advanceForma();
+      });
+
       $('#newExamBtn').addEventListener('click', () => {
-        state.evaluado = null;
-        state.aplicacion = null;
-        state.formas = null;
+        if (state.timerId) clearInterval(state.timerId);
+        state.idEvaluado = null;
+        state.idAplicacion = null;
+        state.formas = [];
+        state.formaActual = 0;
+        state.respuestas = {};
         $('#evaluadoForm').reset();
         $('#questionsContainer').innerHTML = '';
         $('#resultPanel').innerHTML = '';
-        messageArea.innerHTML = '';
+        clearMessage();
         showSection('registroSection');
         activateStep('registro');
       });
