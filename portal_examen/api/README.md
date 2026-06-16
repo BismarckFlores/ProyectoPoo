@@ -105,8 +105,13 @@ Al arrancar, la API ejecuta `ensureSchema` y crea las tablas si no existen.
 
 ## Verificar que funciona
 
+Al arrancar debe imprimir `Server listening on http://localhost:3000`. Para una prueba rápida,
+crea un evaluado (debe responder `201` con el registro creado):
+
 ```bash
-curl http://localhost:3000/api/ping
+curl -X POST http://localhost:3000/api/evaluados \
+  -H 'Content-Type: application/json' \
+  -d '{"nombre":"Test","primer_apellido":"Prueba"}'
 ```
 
 ## Endpoints
