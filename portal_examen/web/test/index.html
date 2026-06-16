@@ -41,7 +41,7 @@
 
         <section class="col-lg-8">
           <div class="exam-workspace">
-            <div id="alert"></div>
+            <div id="alert" class="d-none"></div>
 
             <section class="workspace-section" id="screen-registro">
               <div class="section-title-row">
@@ -149,11 +149,13 @@
       const messageArea = $('#alert');
 
       function showMessage(type, text) {
-        messageArea.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${text}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button></div>`;
+        messageArea.classList.remove('d-none');
+        messageArea.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${escapeHtml(text)}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button></div>`;
       }
 
       function clearMessage() {
         messageArea.innerHTML = '';
+        messageArea.classList.add('d-none');
       }
 
       function setLoading(button, loading, text) {
