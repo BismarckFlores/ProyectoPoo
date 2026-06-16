@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Portal Examen - Test</title>
     <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/styles.css" rel="stylesheet">
   </head>
-  <body>
-    <nav class="navbar navbar-expand-lg bg-light border-bottom">
+  <body class="exam-page">
+    <nav class="navbar navbar-expand-lg app-navbar">
       <div class="container">
-        <a class="navbar-brand fw-semibold" href="/">PortalExamen</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+        <a class="navbar-brand fw-bold" href="/">Portal Examen</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Abrir navegacion">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="mainNav">
-          <ul class="navbar-nav ms-auto">
+          <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
             <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
             <li class="nav-item"><a class="nav-link active" aria-current="page" href="/test/">Test</a></li>
           </ul>
@@ -23,78 +24,284 @@
     </nav>
 
     <main class="container py-5">
-      <h1 class="mb-3">Test de ejemplo</h1>
-      <p class="text-muted">Este formulario calcula un puntaje y lo envía al API en <code>http://localhost:3000/api/submit</code>.</p>
-
-      <form id="quizForm" class="mt-4">
-        <div class="mb-3">
-          <label class="form-label" for="name">Nombre</label>
-          <input id="name" type="text" class="form-control" placeholder="Tu nombre">
-        </div>
-
-        <fieldset class="mb-3">
-          <legend class="fs-6">1) ¿Cuál es la capital de Francia?</legend>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="q1" id="q1a" value="a">
-            <label class="form-check-label" for="q1a">Berlín</label>
+      <div class="row g-4">
+        <aside class="col-lg-4">
+          <div class="exam-sidebar">
+            <span class="eyebrow">Aplicacion de vocabulario</span>
+            <h1>Registro, examen y resultado</h1>
+            <p class="text-secondary">Completa los datos del evaluado, crea la aplicacion y envia sus respuestas al API.</p>
+            <div class="progress-steps">
+              <div class="progress-step active" data-step-indicator="registro"><span>1</span><strong>Registro</strong></div>
+              <div class="progress-step" data-step-indicator="examen"><span>2</span><strong>Examen</strong></div>
+              <div class="progress-step" data-step-indicator="resultado"><span>3</span><strong>Resultado</strong></div>
+            </div>
           </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="q1" id="q1b" value="b">
-            <label class="form-check-label" for="q1b">Madrid</label>
+        </aside>
+
+        <section class="col-lg-8">
+          <div class="exam-workspace">
+            <div id="messageArea"></div>
+
+            <section class="workspace-section" id="registroSection">
+              <div class="section-title-row">
+                <div>
+                  <span class="eyebrow">Paso 1</span>
+                  <h2>Datos del evaluado</h2>
+                </div>
+                <span class="badge text-bg-light">POST /evaluados</span>
+              </div>
+
+              <form id="evaluadoForm" class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label" for="nombre">Nombres</label>
+                  <input id="nombre" name="nombre" type="text" class="form-control" placeholder="Ej. Maria Jose" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="primer_apellido">Primer apellido</label>
+                  <input id="primer_apellido" name="primer_apellido" type="text" class="form-control" placeholder="Ej. Lopez" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="segundo_apellido">Segundo apellido</label>
+                  <input id="segundo_apellido" name="segundo_apellido" type="text" class="form-control" placeholder="Opcional">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="fecha_nacimiento">Fecha de nacimiento</label>
+                  <input id="fecha_nacimiento" name="fecha_nacimiento" type="date" class="form-control">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="sexo">Sexo</label>
+                  <select id="sexo" name="sexo" class="form-select">
+                    <option value="">Seleccionar</option>
+                    <option value="F">Femenino</option>
+                    <option value="M">Masculino</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="estudios">Estudios</label>
+                  <input id="estudios" name="estudios" type="text" class="form-control" placeholder="Ej. Secundaria">
+                </div>
+                <div class="col-12">
+                  <label class="form-label" for="finalidad">Finalidad</label>
+                  <textarea id="finalidad" name="finalidad" class="form-control" rows="2" placeholder="Ej. Evaluacion academica"></textarea>
+                </div>
+                <div class="col-12 d-flex flex-wrap gap-2">
+                  <button class="btn btn-primary" type="submit" id="startBtn">Crear aplicacion</button>
+                  <button class="btn btn-outline-secondary" type="reset">Limpiar</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="workspace-section d-none" id="examenSection">
+              <div class="section-title-row">
+                <div>
+                  <span class="eyebrow">Paso 2</span>
+                  <h2>Responder examen</h2>
+                </div>
+                <span class="badge text-bg-light" id="applicationBadge">Aplicacion</span>
+              </div>
+              <div class="exam-meta" id="examMeta"></div>
+              <form id="answersForm">
+                <div id="questionsContainer" class="questions-list"></div>
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                  <button class="btn btn-primary" type="submit" id="submitAnswersBtn">Calificar respuestas</button>
+                  <button class="btn btn-outline-dark" type="button" id="reloadFormsBtn">Recargar formas</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="workspace-section d-none" id="resultadoSection">
+              <div class="section-title-row">
+                <div>
+                  <span class="eyebrow">Paso 3</span>
+                  <h2>Resultado</h2>
+                </div>
+                <span class="badge text-bg-success">Calificado</span>
+              </div>
+              <div id="resultPanel"></div>
+              <button class="btn btn-outline-dark mt-4" type="button" id="newExamBtn">Nueva aplicacion</button>
+            </section>
           </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="q1" id="q1c" value="c">
-            <label class="form-check-label" for="q1c">París</label>
-          </div>
-        </fieldset>
-
-        <div class="mb-4">
-          <label class="form-label" for="q2">2) 2 + 2 = ?</label>
-          <input id="q2" type="number" class="form-control" name="q2" placeholder="Tu respuesta">
-        </div>
-
-        <button type="button" class="btn btn-primary" id="sendBtn">Comprobar y enviar</button>
-      </form>
-
-      <div id="result" class="mt-4"></div>
+        </section>
+      </div>
     </main>
 
     <script>
       const API_BASE_URL = 'http://localhost:3000/api';
+      const state = { evaluado: null, aplicacion: null, formas: null };
+      const $ = (selector) => document.querySelector(selector);
+      const messageArea = $('#messageArea');
 
-      async function submitScore(payload) {
-        const response = await fetch(`${API_BASE_URL}/submit`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-          const body = await response.json().catch(() => ({}));
-          throw new Error(body.error || `HTTP ${response.status}`);
-        }
-
-        return response.json();
+      function showMessage(type, text) {
+        messageArea.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${text}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button></div>`;
       }
 
-      document.getElementById('sendBtn').addEventListener('click', async () => {
-        const name = document.getElementById('name').value.trim() || 'Anónimo';
-        const q1 = document.querySelector('input[name="q1"]:checked')?.value;
-        const q2 = document.getElementById('q2').value.trim();
-
-        let score = 0;
-        if (q1 === 'c') score += 1;
-        if (q2 === '4') score += 1;
-
-        const resultEl = document.getElementById('result');
-        resultEl.innerHTML = '<div class="alert alert-info">Guardando resultado...</div>';
-
-        try {
-          const saved = await submitScore({ name, score });
-          resultEl.innerHTML = `<div class="alert alert-success">Puntaje: ${score}/2. Guardado con id ${saved.id}.</div>`;
-        } catch (error) {
-          resultEl.innerHTML = `<div class="alert alert-danger">No se pudo guardar: ${error.message}</div>`;
+      function setLoading(button, loading, text) {
+        button.disabled = loading;
+        if (loading) {
+          button.dataset.originalText = button.textContent;
+          button.textContent = text;
+        } else {
+          button.textContent = button.dataset.originalText || button.textContent;
         }
+      }
+
+      async function api(path, options = {}) {
+        const response = await fetch(`${API_BASE_URL}${path}`, {
+          ...options,
+          headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }
+        });
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`);
+        return body;
+      }
+
+      function payloadFromForm(form) {
+        const data = new FormData(form);
+        const payload = {
+          nombre: data.get('nombre')?.trim(),
+          primer_apellido: data.get('primer_apellido')?.trim(),
+          segundo_apellido: data.get('segundo_apellido')?.trim(),
+          fecha_nacimiento: data.get('fecha_nacimiento'),
+          sexo: data.get('sexo'),
+          estudios: data.get('estudios')?.trim()
+        };
+        Object.keys(payload).forEach((key) => !payload[key] && delete payload[key]);
+        return payload;
+      }
+
+      function activateStep(step) {
+        const order = ['registro', 'examen', 'resultado'];
+        document.querySelectorAll('.progress-step').forEach((el) => {
+          const current = el.dataset.stepIndicator;
+          el.classList.toggle('active', current === step);
+          el.classList.toggle('done', order.indexOf(current) < order.indexOf(step));
+        });
+      }
+
+      function showSection(sectionId) {
+        ['registroSection', 'examenSection', 'resultadoSection'].forEach((id) => {
+          document.getElementById(id).classList.toggle('d-none', id !== sectionId);
+        });
+      }
+
+      function renderForms() {
+        const formas = [state.formas.forma_a, state.formas.forma_b].filter(Boolean);
+        const allItems = formas.flatMap((entry) => entry.items.map((item) => ({ ...item, formaTitulo: entry.forma.titulo })));
+
+        $('#applicationBadge').textContent = `Aplicacion #${state.aplicacion.id_aplicacion}`;
+        $('#examMeta').innerHTML = formas.map((entry) => `<div><span>${entry.forma.tipo}</span><strong>${entry.forma.titulo}</strong><small>${entry.items.length} items</small></div>`).join('');
+        $('#questionsContainer').innerHTML = allItems.map((item, index) => `
+          <article class="question-card">
+            <div class="question-header"><span>Pregunta ${index + 1}</span><small>${item.formaTitulo}</small></div>
+            <h3>${item.palabra_estimulo || 'Item sin palabra estimulo'}</h3>
+            <div class="option-grid">
+              ${item.opciones.map((opcion) => `
+                <label class="option-choice">
+                  <input type="radio" name="item_${item.id_item}" value="${opcion.letra}" required>
+                  <span>${opcion.letra}</span>
+                  <strong>${opcion.texto || 'Sin texto'}</strong>
+                </label>
+              `).join('')}
+            </div>
+          </article>
+        `).join('');
+      }
+
+      async function loadForms() {
+        state.formas = await api(`/aplicaciones/${state.aplicacion.id_aplicacion}/formas`);
+        renderForms();
+        showSection('examenSection');
+        activateStep('examen');
+      }
+
+      function collectAnswers() {
+        return Array.from(document.querySelectorAll('#questionsContainer input[type="radio"]:checked')).map((input) => ({
+          id_item: Number(input.name.replace('item_', '')),
+          letra_marcada: input.value
+        }));
+      }
+
+      function renderResult(resultado) {
+        const rows = (resultado.puntuaciones || []).map((p) => `<tr><td>${p.factor}</td><td>${p.puntuacion_directa}</td><td>${p.puntuacion_tipica}</td></tr>`).join('');
+        $('#resultPanel').innerHTML = `
+          <div class="result-summary">
+            <div><span>Resultado</span><strong>#${resultado.id_resultado}</strong></div>
+            <p>${resultado.texto_interpretativo || 'Resultado guardado correctamente.'}</p>
+          </div>
+          <div class="table-responsive mt-3">
+            <table class="table align-middle">
+              <thead><tr><th>Factor</th><th>Puntuacion directa</th><th>Puntuacion tipica</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>`;
+      }
+
+      $('#evaluadoForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = $('#startBtn');
+        setLoading(button, true, 'Creando...');
+        messageArea.innerHTML = '';
+        try {
+          state.evaluado = await api('/evaluados', { method: 'POST', body: JSON.stringify(payloadFromForm(event.currentTarget)) });
+          state.aplicacion = await api('/aplicaciones', {
+            method: 'POST',
+            body: JSON.stringify({ id_evaluado: state.evaluado.id_evaluado, finalidad: $('#finalidad').value.trim() || undefined })
+          });
+          await loadForms();
+          showMessage('success', 'Aplicacion creada y formas cargadas correctamente.');
+        } catch (error) {
+          showMessage('danger', `No se pudo iniciar la aplicacion: ${error.message}`);
+        } finally {
+          setLoading(button, false);
+        }
+      });
+
+      $('#answersForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = $('#submitAnswersBtn');
+        const respuestas = collectAnswers();
+        const totalItems = document.querySelectorAll('.question-card').length;
+        if (respuestas.length !== totalItems) {
+          showMessage('warning', 'Responde todos los items antes de calificar.');
+          return;
+        }
+        setLoading(button, true, 'Calificando...');
+        try {
+          const resultado = await api(`/aplicaciones/${state.aplicacion.id_aplicacion}/calificar`, { method: 'POST', body: JSON.stringify({ respuestas }) });
+          renderResult(resultado);
+          showSection('resultadoSection');
+          activateStep('resultado');
+          showMessage('success', 'Resultado generado correctamente.');
+        } catch (error) {
+          showMessage('danger', `No se pudo calificar: ${error.message}`);
+        } finally {
+          setLoading(button, false);
+        }
+      });
+
+      $('#reloadFormsBtn').addEventListener('click', async () => {
+        const button = $('#reloadFormsBtn');
+        setLoading(button, true, 'Recargando...');
+        try {
+          await loadForms();
+          showMessage('info', 'Formas recargadas desde la API.');
+        } catch (error) {
+          showMessage('danger', `No se pudieron recargar las formas: ${error.message}`);
+        } finally {
+          setLoading(button, false);
+        }
+      });
+
+      $('#newExamBtn').addEventListener('click', () => {
+        state.evaluado = null;
+        state.aplicacion = null;
+        state.formas = null;
+        $('#evaluadoForm').reset();
+        $('#questionsContainer').innerHTML = '';
+        $('#resultPanel').innerHTML = '';
+        messageArea.innerHTML = '';
+        showSection('registroSection');
+        activateStep('registro');
       });
     </script>
     <script src="../js/bootstrap.bundle.min.js"></script>
