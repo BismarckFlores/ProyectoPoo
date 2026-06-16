@@ -5,6 +5,7 @@ export type AplicacionTest = {
     id_evaluado: number;
     id_forma_a: number;
     id_forma_b: number;
+    id_normas: number;
     fecha_examen: string | null;
     finalidad: string | null;
     estado: 'ASIGNADO' | 'EN_PROGRESO' | 'FINALIZADO' | 'CALIFICADO';
@@ -16,6 +17,5 @@ export type CrearAplicacionDTO = {
 };
 
 export type CalificarAplicacionDTO = {
-    id_normas: number;
     respuestas: RegistrarRespuestaDTO[];
 };

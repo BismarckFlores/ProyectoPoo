@@ -51,10 +51,11 @@ export class ResultadoService {
         await this.respuestaRepo.createMany(idAplicacion, calculadas);
         const respuestas = await this.respuestaRepo.findByAplicacion(idAplicacion);
 
+        // El baremo a usar viene definido en la aplicación (snapshot de la config activa).
         const [entradasVoc1, entradasVoc2, entradasVoct] = await Promise.all([
-            this.baremoRepo.findByNormasYFactor(dto.id_normas, 'VOC1'),
-            this.baremoRepo.findByNormasYFactor(dto.id_normas, 'VOC2'),
-            this.baremoRepo.findByNormasYFactor(dto.id_normas, 'VOCT'),
+            this.baremoRepo.findByNormasYFactor(aplicacion.id_normas, 'VOC1'),
+            this.baremoRepo.findByNormasYFactor(aplicacion.id_normas, 'VOC2'),
+            this.baremoRepo.findByNormasYFactor(aplicacion.id_normas, 'VOCT'),
         ]);
 
         const rangoA = this.rango(formaA, itemsA);

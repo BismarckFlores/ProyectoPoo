@@ -2,6 +2,7 @@ import { AplicacionTestRepository } from "../repositories/AplicacionTestReposito
 import { FormaRepository } from "../repositories/FormaRepository";
 import { ItemRepository } from "../repositories/ItemRepository";
 import { EvaluadoRepository } from "../repositories/EvaluadoRepository";
+import { ConfiguracionRepository } from "../repositories/ConfiguracionRepository";
 import { AplicacionTest, CrearAplicacionDTO } from "../types/aplicacion";
 import { FormaVocabulario, Item, ItemPublico } from "../types/forma";
 
@@ -15,25 +16,25 @@ export class AplicacionTestService {
         private readonly aplicacionRepo : AplicacionTestRepository,
         private readonly evaluadoRepo : EvaluadoRepository,
         private readonly formaRepo : FormaRepository,
-        private readonly itemRepo : ItemRepository
+        private readonly itemRepo : ItemRepository,
+        private readonly configuracionRepo : ConfiguracionRepository
     ) {}
 
     async crear(dto : CrearAplicacionDTO) : Promise<AplicacionTest> {
         const evaluado = await this.evaluadoRepo.findById(dto.id_evaluado);
         if (!evaluado) throw new Error(`Evaluado con id ${dto.id_evaluado} no encontrado`);
 
-        const formaA = await this.formaRepo.findByTipo('A');
-        if (!formaA) throw new Error('No hay una Forma A configurada en la base de datos');
-
-        const formaB = await this.formaRepo.findByTipo('B');
-        if (!formaB) throw new Error('No hay una Forma B configurada en la base de datos');
+        // Las formas y el baremo salen de la configuración activa (definida en OpenXava).
+        const config = await this.configuracionRepo.findActiva();
+        if (!config) throw new Error('No hay una configuración de examen activa');
 
         const fechaExamen = new Date().toISOString().slice(0, 10);
 
         return this.aplicacionRepo.create(
             dto.id_evaluado,
-            formaA.id_forma,
-            formaB.id_forma,
+            config.id_forma_a,
+            config.id_forma_b,
+            config.id_normas,
             dto.finalidad ?? null,
             fechaExamen
         );

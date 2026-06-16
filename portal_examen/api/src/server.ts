@@ -12,6 +12,7 @@ import { ItemRepository } from "./repositories/ItemRepository";
 import { RespuestaRepository } from "./repositories/RespuestaRepository";
 import { ResultadoRepository } from "./repositories/ResultadoRepository";
 import { BaremoRepository } from "./repositories/BaremoRepository";
+import { ConfiguracionRepository } from "./repositories/ConfiguracionRepository";
 
 import { EvaluadoService } from "./services/EvaluadoService";
 import { AplicacionTestService } from "./services/AplicacionTestService";
@@ -30,9 +31,10 @@ const itemRepo           = new ItemRepository(pool);
 const respuestaRepo      = new RespuestaRepository(pool);
 const resultadoRepo      = new ResultadoRepository(pool);
 const baremoRepo         = new BaremoRepository(pool);
+const configuracionRepo  = new ConfiguracionRepository(pool);
 
 const evaluadoService    = new EvaluadoService(evaluadoRepo);
-const aplicacionService  = new AplicacionTestService(aplicacionRepo, evaluadoRepo, formaRepo, itemRepo);
+const aplicacionService  = new AplicacionTestService(aplicacionRepo, evaluadoRepo, formaRepo, itemRepo, configuracionRepo);
 const resultadoService   = new ResultadoService(aplicacionRepo, formaRepo, itemRepo, respuestaRepo, resultadoRepo, baremoRepo);
 
 const evaluadoController    = new EvaluadoController(evaluadoService);
