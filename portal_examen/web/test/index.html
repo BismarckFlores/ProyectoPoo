@@ -142,7 +142,8 @@
         formas: [],
         formaActual: 0,
         respuestas: {},
-        timerId: null
+        timerId: null,
+        isSubmitting: false
       };
       const $ = (selector) => document.querySelector(selector);
       const messageArea = $('#alert');
@@ -314,6 +315,8 @@
       }
 
       async function submitAndGrade() {
+        if (state.isSubmitting) return;
+        state.isSubmitting = true;
         const button = $('#btnSiguiente');
         const respuestas = Object.entries(state.respuestas).map(([id_item, letra_marcada]) => ({
           id_item: Number(id_item),
@@ -330,6 +333,7 @@
         } catch (error) {
           showMessage('danger', `No se pudo calificar: ${error.message}`);
         } finally {
+          state.isSubmitting = false;
           setLoading(button, false);
         }
       }
@@ -391,6 +395,7 @@
         state.formas = [];
         state.formaActual = 0;
         state.respuestas = {};
+        state.isSubmitting = false;
         $('#formRegistro').reset();
         $('#itemsContainer').innerHTML = '';
         $('#resultadoInterpretacion').innerHTML = '';
