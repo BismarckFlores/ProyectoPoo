@@ -1,3 +1,27 @@
 # Planes locales: no se suben al repo, solo para enviar al equipo
 /plan_xava.md
 /plan_frontend.md
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Build outputs
+target/
+data/
+
+# OpenXava local/generated files
+**/.xava/
+
+# Logs
+*.log
+
+# IntelliJ IDEA local files
+.idea/
+
+# Accidental npm file inside OpenXava project
+panel_administracion/package-lock.json

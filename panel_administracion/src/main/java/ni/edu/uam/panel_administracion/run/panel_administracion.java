@@ -9,7 +9,7 @@ import org.openxava.util.*;
 public class panel_administracion {
 
 	public static void main(String[] args) throws Exception {
-		DBServer.start("panel_administracion-db"); // Para usar tu propia base de datos comenta esta línea y configura src/main/webapp/META-INF/context.xml
+		//DBServer.start("panel_administracion-db"); // Para usar tu propia base de datos comenta esta línea y configura src/main/webapp/META-INF/context.xml
 		AppServer.run("panel_administracion"); // Usa AppServer.run("") para funcionar en el contexto raíz
 	}
 
