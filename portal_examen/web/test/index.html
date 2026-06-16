@@ -270,7 +270,7 @@
           paint();
           if (remaining <= 0) {
             clearInterval(state.timerId);
-            advanceForma();
+            advanceForma(true);
           }
         }, 1000);
       }
@@ -288,11 +288,11 @@
         return current.items.every((item) => document.querySelector(`input[name="item_${item.id_item}"]:checked`));
       }
 
-      async function advanceForma() {
+      async function advanceForma(fromTimer = false) {
         if (state.timerId) clearInterval(state.timerId);
         saveCurrentAnswers();
 
-        if (!currentFormaIsComplete()) {
+        if (!fromTimer && !currentFormaIsComplete()) {
           showMessage('warning', 'Responde todos los items antes de continuar.');
           startTimer(state.formas[state.formaActual].forma.tiempo_limite_seg);
           return;
