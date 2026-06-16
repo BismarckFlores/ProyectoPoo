@@ -41,9 +41,9 @@
 
         <section class="col-lg-8">
           <div class="exam-workspace">
-            <div id="messageArea"></div>
+            <div id="alert"></div>
 
-            <section class="workspace-section" id="registroSection">
+            <section class="workspace-section" id="screen-registro">
               <div class="section-title-row">
                 <div>
                   <span class="eyebrow">Paso 1</span>
@@ -52,7 +52,7 @@
                 <span class="badge text-bg-light">POST /evaluados</span>
               </div>
 
-              <form id="evaluadoForm" class="row g-3">
+              <form id="formRegistro" class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label" for="nombre">Nombres</label>
                   <input id="nombre" name="nombre" type="text" class="form-control" placeholder="Ej. Maria Jose" required>
@@ -92,7 +92,7 @@
               </form>
             </section>
 
-            <section class="workspace-section d-none" id="formaSection">
+            <section class="workspace-section d-none" id="screen-forma">
               <div class="section-title-row">
                 <div>
                   <span class="eyebrow" id="formaPaso">Paso 2</span>
@@ -105,14 +105,14 @@
               </div>
               <p class="text-secondary" id="formaInstrucciones"></p>
               <form id="answersForm">
-                <div id="questionsContainer" class="questions-list"></div>
+                <div id="itemsContainer" class="questions-list"></div>
                 <div class="d-flex flex-wrap gap-2 mt-4">
-                  <button class="btn btn-primary" type="submit" id="nextBtn">Siguiente forma</button>
+                  <button class="btn btn-primary" type="submit" id="btnSiguiente">Siguiente forma</button>
                 </div>
               </form>
             </section>
 
-            <section class="workspace-section d-none" id="resultadoSection">
+            <section class="workspace-section d-none" id="screen-resultado">
               <div class="section-title-row">
                 <div>
                   <span class="eyebrow">Paso 4</span>
@@ -120,7 +120,13 @@
                 </div>
                 <span class="badge text-bg-success">Calificado</span>
               </div>
-              <div id="resultPanel"></div>
+              <div class="result-summary" id="resultadoInterpretacion"></div>
+              <div class="table-responsive mt-3">
+                <table class="table align-middle">
+                  <thead><tr><th>Factor</th><th>Puntuacion directa</th><th>Percentil / tipica</th></tr></thead>
+                  <tbody id="resultadoTabla"></tbody>
+                </table>
+              </div>
               <button class="btn btn-outline-dark mt-4" type="button" id="newExamBtn">Nueva aplicacion</button>
             </section>
           </div>
@@ -139,7 +145,7 @@
         timerId: null
       };
       const $ = (selector) => document.querySelector(selector);
-      const messageArea = $('#messageArea');
+      const messageArea = $('#alert');
 
       function showMessage(type, text) {
         messageArea.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">${text}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button></div>`;
@@ -194,7 +200,7 @@
       }
 
       function showSection(sectionId) {
-        ['registroSection', 'formaSection', 'resultadoSection'].forEach((id) => {
+        ['screen-registro', 'screen-forma', 'screen-resultado'].forEach((id) => {
           document.getElementById(id).classList.toggle('d-none', id !== sectionId);
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -219,9 +225,9 @@
         $('#formaPaso').textContent = `Paso ${state.formaActual + 2}`;
         $('#formaTitulo').textContent = forma.titulo || `Forma ${forma.tipo || state.formaActual + 1}`;
         $('#formaInstrucciones').textContent = forma.instrucciones || 'Selecciona una opcion por cada item.';
-        $('#nextBtn').textContent = isLast ? 'Finalizar y enviar' : 'Siguiente forma';
+        $('#btnSiguiente').textContent = isLast ? 'Finalizar y enviar' : 'Siguiente forma';
 
-        $('#questionsContainer').innerHTML = items.map((item) => `
+        $('#itemsContainer').innerHTML = items.map((item) => `
           <article class="question-card">
             <div class="question-header">
               <span>Item ${escapeHtml(item.numero)}</span>
@@ -244,7 +250,7 @@
         `).join('');
 
         clearMessage();
-        showSection('formaSection');
+        showSection('screen-forma');
         activateStep(stepName);
         startTimer(forma.tiempo_limite_seg);
       }
@@ -308,7 +314,7 @@
       }
 
       async function submitAndGrade() {
-        const button = $('#nextBtn');
+        const button = $('#btnSiguiente');
         const respuestas = Object.entries(state.respuestas).map(([id_item, letra_marcada]) => ({
           id_item: Number(id_item),
           letra_marcada
@@ -318,7 +324,7 @@
         try {
           const resultado = await api('POST', `/aplicaciones/${state.idAplicacion}/calificar`, { respuestas });
           renderResult(resultado);
-          showSection('resultadoSection');
+          showSection('screen-resultado');
           activateStep('resultado');
           showMessage('success', 'Resultado generado correctamente.');
         } catch (error) {
@@ -337,20 +343,13 @@
           </tr>
         `).join('');
 
-        $('#resultPanel').innerHTML = `
-          <div class="result-summary">
-            <div><span>Interpretacion</span><strong>#${escapeHtml(resultado.id_resultado)}</strong></div>
-            <p>${escapeHtml(resultado.texto_interpretativo || 'Resultado guardado correctamente.')}</p>
-          </div>
-          <div class="table-responsive mt-3">
-            <table class="table align-middle">
-              <thead><tr><th>Factor</th><th>Puntuacion directa</th><th>Percentil / tipica</th></tr></thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>`;
+        $('#resultadoInterpretacion').innerHTML = `
+          <div><span>Interpretacion</span><strong>#${escapeHtml(resultado.id_resultado)}</strong></div>
+          <p>${escapeHtml(resultado.texto_interpretativo || 'Resultado guardado correctamente.')}</p>`;
+        $('#resultadoTabla').innerHTML = rows;
       }
 
-      $('#evaluadoForm').addEventListener('submit', async (event) => {
+      $('#formRegistro').addEventListener('submit', async (event) => {
         event.preventDefault();
         const button = $('#startBtn');
         setLoading(button, true, 'Creando...');
@@ -392,11 +391,12 @@
         state.formas = [];
         state.formaActual = 0;
         state.respuestas = {};
-        $('#evaluadoForm').reset();
-        $('#questionsContainer').innerHTML = '';
-        $('#resultPanel').innerHTML = '';
+        $('#formRegistro').reset();
+        $('#itemsContainer').innerHTML = '';
+        $('#resultadoInterpretacion').innerHTML = '';
+        $('#resultadoTabla').innerHTML = '';
         clearMessage();
-        showSection('registroSection');
+        showSection('screen-registro');
         activateStep('registro');
       });
     </script>
